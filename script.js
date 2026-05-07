@@ -54,7 +54,7 @@ function calculateSamples() {
             if (!markerPlaced && currentLotNumber < lotNum) {
                 htmlOutput += `
                     <div style="margin: 10px 0; padding: 8px; border: 1px dashed #0056b3; background: #eef6ff; color: #0056b3; border-radius: 4px; text-align: center; font-size: 0.9rem; font-weight: bold;">
-                        ⬇️ Machine is currently at Lot #${currentLotNumber} (${currentKg.toLocaleString()}kg)
+                        ⬇️ Currently at Lot #${currentLotNumber} (${currentKg.toLocaleString()}kg)
                     </div>
                 `;
                 markerPlaced = true;
