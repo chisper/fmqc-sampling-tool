@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Dashboard</title>
+    <style>
+        /* A little bit of base styling to make it easy on the eyes */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        main {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<main>
+    <h1>QC Sampling</h1>
+    
+    <!-- Input Section -->
+    <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
+        <div style="flex: 1; min-width: 140px;">
+            <label>Total Lots:</label>
+            <input type="number" id="lotCount" placeholder="0" min="1" max="21" oninput="calculateSamples()">
+        </div>
+        <div style="flex: 1; min-width: 140px;">
+            <label>Lot Size (kg):</label>
+            <input type="number" id="kgPerLot" placeholder="e.g. 700" oninput="calculateSamples()">
+        </div>
+        <div style="flex: 1; min-width: 140px;">
+            <label style="color: #0056b3; font-weight: bold;">Total KG passed:</label>
+            <input type="number" id="currentKg" placeholder="Reading..." oninput="calculateSamples()" style="border: 2px solid #0056b3;">
+        </div>
+    </div>
+
+    <!-- The "Digital Post-it" Summary -->
+    <div id="summaryBox" style="margin-bottom: 20px; padding: 10px; background: #fffde7; border: 1px solid #ffe58f; border-radius: 4px; display: none;">
+        <strong>Quick Summary:</strong> <span id="summaryText"></span>
+    </div>
+
+    <div id="results">
+        <!-- Results will update here -->
+    </div>
+</main>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
