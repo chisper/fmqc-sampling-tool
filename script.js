@@ -3,20 +3,31 @@ let checkedSamples = JSON.parse(localStorage.getItem('qc_samples')) || {};
 
 // 2. The Logic Engine
 function getSamplingLots(totalLots) {
-    const smallBatchRules = {
-        1: [1], 2: [1, 2], 3: [1, 2, 3], 4: [1, 2, 4], 5: [1, 3, 5], 6: [1, 3, 6]
+    // 1. Hardcoded rules for specific batches (1-10) 
+    // This ensures Lot 10 stays as [1, 3, 6, 10]
+    const manualOverrides = {
+        1: [1],
+        2: [1, 2],
+        3: [1, 2, 3],
+        4: [1, 2, 4],
+        5: [1, 3, 5],
+        6: [1, 3, 6],
+        7: [1, 2, 6, 7],
+        8: [1, 3, 6, 8],
+        9: [1, 3, 6, 9],
+        10: [1, 3, 6, 10]
     };
 
-    if (totalLots <= 6) return smallBatchRules[totalLots] || [];
+    if (manualOverrides[totalLots]) return manualOverrides[totalLots];
 
+    // 2. Dynamic logic for anything 11 or higher
     let samples = new Set();
-    samples.add(1);
-    samples.add(totalLots);
+    samples.add(1);          // Always include the Start
+    samples.add(totalLots);  // Always include the End
 
-    if (totalLots >= 7 && totalLots <= 10) {
-        for (let i = 3; i < totalLots; i += 3) { samples.add(i); }
-    } else if (totalLots >= 11) {
-        for (let i = 5; i < totalLots; i += 5) { samples.add(i); }
+    // For 11+, the rule is every 5th lot
+    for (let i = 5; i < totalLots; i += 5) {
+        samples.add(i);
     }
 
     return Array.from(samples).sort((a, b) => a - b);
