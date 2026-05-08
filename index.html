@@ -49,6 +49,21 @@
         <strong>Quick Summary:</strong> <span id="summaryText"></span>
     </div>
 
+    <div style="background: #fdfdfd; border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <h4>Current Lot Guesstimator</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <label>Pouch Weight (grams):<br>
+                <input type="number" id="pouchGrams" value="" oninput="calculateSamples()">
+            </label>
+            <label>How many seconds for 10 pouches to pass (Approx):<br>
+                <input type="number" id="timingSecs" placeholder="e.g. 20" oninput="calculateSamples()">
+            </label>
+        </div>
+        <button id="timerBtn" onclick="toggleAutoDrive()" style="width: 100%; margin-top: 15px; padding: 10px; background: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+            ▶ Start Live Estimation
+        </button>
+    </div>
+
     <div id="results">
         <!-- Results will update here -->
     </div>

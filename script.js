@@ -129,5 +129,46 @@ function calculateSamples() {
     }
 }
 
+let autoDriveInterval = null;
+
+function toggleAutoDrive() {
+    const btn = document.getElementById('timerBtn');
+    
+    if (autoDriveInterval) {
+        // Stop the timer
+        clearInterval(autoDriveInterval);
+        autoDriveInterval = null;
+        btn.innerHTML = "▶ Start Live Estimation";
+        btn.style.background = "#28a745";
+    } else {
+        // Start the timer
+        const pouchGrams = parseFloat(document.getElementById('pouchGrams').value);
+        const timingSecs = parseFloat(document.getElementById('timingSecs').value);
+
+        if (!pouchGrams || !timingSecs) {
+            alert("Please enter pouch weight and timing seconds first!");
+            return;
+        }
+
+        // Calculate KG per second
+        // (10 pouches * grams) / 1000 = KG. KG / seconds = KG per second.
+        const kgPerSecond = ((10 * pouchGrams) / 1000) / timingSecs;
+
+        autoDriveInterval = setInterval(() => {
+            const kgInput = document.getElementById('currentKg');
+            let current = parseFloat(kgInput.value) || 0;
+            
+            // Increment the value
+            kgInput.value = (current + kgPerSecond).toFixed(2);
+            
+            // Refresh the display cards
+            calculateSamples();
+        }, 1000); // Runs every 1 second
+
+        btn.innerHTML = "⏹ Stop Estimation";
+        btn.style.background = "#d93025";
+    }
+}
+
 // 5. Run once on load
 calculateSamples();
