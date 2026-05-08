@@ -1,20 +1,46 @@
-const samplingRules = {
-    1: [1], 2: [1, 2], 3: [1, 2, 3], 4: [1, 2, 4], 5: [1, 3, 5],
-    6: [1, 3, 6], 7: [1, 3, 6, 7], 8: [1, 3, 6, 8], 9: [1, 3, 6, 9],
-    10: [1, 3, 6, 10], 11: [1, 5, 10, 11], 12: [1, 5, 10, 12],
-    13: [1, 5, 10, 13], 14: [1, 5, 10, 14], 15: [1, 5, 10, 15],
-    16: [1, 5, 10, 15, 16], 17: [1, 5, 10, 15, 17], 18: [1, 5, 10, 15, 18],
-    19: [1, 5, 10, 15, 19], 20: [1, 5, 10, 15, 20], 21: [1, 5, 10, 15, 20, 21]
-};
+// 1. ALWAYS initialize the state first
+let checkedSamples = JSON.parse(localStorage.getItem('qc_samples')) || {};
 
-// State to keep track of checked samples
-let checkedSamples = {};
+// 2. The Logic Engine
+function getSamplingLots(totalLots) {
+    const smallBatchRules = {
+        1: [1], 2: [1, 2], 3: [1, 2, 3], 4: [1, 2, 4], 5: [1, 3, 5], 6: [1, 3, 6]
+    };
 
-function toggleSample(lotNum) {
-    checkedSamples[lotNum] = !checkedSamples[lotNum];
-    calculateSamples(); // Re-render to show changes
+    if (totalLots <= 6) return smallBatchRules[totalLots] || [];
+
+    let samples = new Set();
+    samples.add(1);
+    samples.add(totalLots);
+
+    if (totalLots >= 7 && totalLots <= 10) {
+        for (let i = 3; i < totalLots; i += 3) { samples.add(i); }
+    } else if (totalLots >= 11) {
+        for (let i = 5; i < totalLots; i += 5) { samples.add(i); }
+    }
+
+    return Array.from(samples).sort((a, b) => a - b);
 }
 
+// 3. User Interaction Functions
+function toggleSample(lotNum) {
+    checkedSamples[lotNum] = !checkedSamples[lotNum];
+    localStorage.setItem('qc_samples', JSON.stringify(checkedSamples));
+    calculateSamples();
+}
+
+function resetBatch() {
+    if(confirm("Are you sure you want to clear all data for a new batch?")) {
+        checkedSamples = {};
+        localStorage.removeItem('qc_samples');
+        document.getElementById('lotCount').value = '';
+        document.getElementById('kgPerLot').value = '';
+        document.getElementById('currentKg').value = '';
+        calculateSamples();
+    }
+}
+
+// 4. The Main Display Function
 function calculateSamples() {
     const lotInput = document.getElementById('lotCount');
     const kgInput = document.getElementById('kgPerLot');
@@ -27,20 +53,21 @@ function calculateSamples() {
     const kgPerLot = parseFloat(kgInput.value);
     const currentKg = parseFloat(currentKgInput.value) || 0;
 
-    if (!lotInput.value || !kgInput.value || kgPerLot <= 0) {
+    if (!lotInput || !lotInput.value || !kgInput.value || kgPerLot <= 0) {
         resultsDiv.innerHTML = "<em>Waiting for production data...</em>";
-        summaryBox.style.display = "none";
+        if(summaryBox) summaryBox.style.display = "none";
         return;
     }
 
     const currentLotNumber = Math.ceil(currentKg / kgPerLot) || 1;
+    const samples = getSamplingLots(totalLots);
 
-    if (samplingRules[totalLots]) {
-        const samples = samplingRules[totalLots];
-        
-        // Update Summary Box
+    if (samples.length > 0) {
         summaryBox.style.display = "block";
-        summaryText.innerText = `${totalLots} Lots @ ${kgPerLot}kg: Samples needed for Lots [${samples.join(', ')}]`;
+        summaryText.innerHTML = `
+            ${totalLots} Lots @ ${kgPerLot}kg: Samples needed for Lots [${samples.join(', ')}]
+            <button onclick="resetBatch()" style="margin-left:20px; padding:2px 8px; font-size:0.7rem; cursor:pointer;">Reset All</button>
+        `;
 
         let htmlOutput = `<h3 style="margin-bottom: 20px;">QC Action Plan</h3>`;
         let markerPlaced = false;
@@ -49,7 +76,7 @@ function calculateSamples() {
             const startKg = (lotNum - 1) * kgPerLot;
             const endKg = lotNum * kgPerLot;
             const isActive = (currentLotNumber === lotNum);
-            const isChecked = checkedSamples[lotNum];
+            const isChecked = checkedSamples[lotNum]; // ERROR WAS HERE
 
             if (!markerPlaced && currentLotNumber < lotNum) {
                 htmlOutput += `
@@ -60,7 +87,6 @@ function calculateSamples() {
                 markerPlaced = true;
             }
 
-            // Styling adjustments
             const borderStyle = isChecked ? '8px solid #6c757d' : (isActive ? '8px solid #ffc107' : '8px solid #28a745');
             const backgroundStyle = isChecked ? '#f8f9fa' : (isActive ? '#fff9e6' : '#ffffff');
             const opacity = (currentLotNumber > lotNum || isChecked) ? '0.6' : '1';
@@ -91,3 +117,6 @@ function calculateSamples() {
         resultsDiv.innerHTML = htmlOutput;
     }
 }
+
+// 5. Run once on load
+calculateSamples();
